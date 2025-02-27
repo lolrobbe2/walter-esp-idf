@@ -2420,7 +2420,12 @@ void WalterModem::_processQueueRsp(
             }
             _httpContextSet[profileId].contentLength = contentLength;
 
-            _dispatchEvent(WALTER_MODEM_EVENT_TYPE_HTTP,WALTER_MODEM_HTTP_EVENT_RING,nullptr,profileId);
+            if(httpStatus == 0) {
+                _dispatchEvent(WALTER_MODEM_EVENT_TYPE_HTTP,WALTER_MODEM_HTTP_EVENT_TIMEOUT,nullptr,profileId);
+            } else {
+                _dispatchEvent(WALTER_MODEM_EVENT_TYPE_HTTP, WALTER_MODEM_HTTP_EVENT_RING, nullptr, profileId);
+            }
+
         } else {
             /* incomplete ring message. TODO: report this as an error.
              * length is definitely missing so doing a proper receive
@@ -2428,6 +2433,8 @@ void WalterModem::_processQueueRsp(
              * (knowing that this is a URC so there is no command
              * to give feedback to)
              */
+            _dispatchEvent(WALTER_MODEM_EVENT_TYPE_HTTP, WALTER_MODEM_HTTP_EVENT_TIMEOUT, nullptr, profileId);
+            
             buff->free = true;
             return;
         }

@@ -1001,6 +1001,7 @@ typedef enum {
 
 typedef enum {
     WALTER_MODEM_HTTP_EVENT_RING,
+    WALTER_MODEM_HTTP_EVENT_TIMEOUT,
 } WalterModemHTTPEvent;
 /**
  * @brief Header of a network registration event handler.
