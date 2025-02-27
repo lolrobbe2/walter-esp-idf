@@ -2409,8 +2409,7 @@ void WalterModem::_processQueueRsp(
                 return;
             }
 
-            /* remember ring info - TODO: once we implement events,
-             * call the event handler if any */
+            /* remember ring info */
             _httpContextSet[profileId].state =
                 WALTER_MODEM_HTTP_CONTEXT_STATE_GOT_RING;
             _httpContextSet[profileId].httpStatus = httpStatus;
@@ -2420,6 +2419,8 @@ void WalterModem::_processQueueRsp(
                         _httpContextSet[profileId].contentTypeSize - 1);
             }
             _httpContextSet[profileId].contentLength = contentLength;
+
+            _dispatchEvent(WALTER_MODEM_EVENT_TYPE_HTTP,WALTER_MODEM_HTTP_EVENT_RING,nullptr,profileId);
         } else {
             /* incomplete ring message. TODO: report this as an error.
              * length is definitely missing so doing a proper receive
@@ -4093,7 +4094,9 @@ void WalterModem::_dispatchEvent(WalterModemEventType type, int subtype, void *d
             ((walterModemATEventHandler)handler->handler)
                 ((const char*) data, subtype, handler->args);
             break;
-        
+        case WALTER_MODEM_EVENT_TYPE_HTTP:
+            ((walterModemHTTPEventHandler)handler->handler)
+                ((WALTER_MODEM_HTTP_EVENT_RING),id,handler->args);
         case WALTER_MODEM_EVENT_TYPE_COUNT:
             break;
     }
@@ -4404,24 +4407,37 @@ bool WalterModem::httpDidRing(
         _returnState(WALTER_MODEM_STATE_AWAITING_RING);
     }
 
-    if(_httpContextSet[profileId].state !=
-            WALTER_MODEM_HTTP_CONTEXT_STATE_GOT_RING) {
+    return httpReceive(profileId, targetBuf, targetBufsize, rsp);
+}
+
+bool WalterModem::httpReceive(
+    uint8_t profileId,
+    uint8_t *targetBuf,
+    uint16_t targetBufSize,
+    WalterModemRsp *rsp = NULL) {
+
+    if (_httpContextSet[profileId].state !=
+        WALTER_MODEM_HTTP_CONTEXT_STATE_GOT_RING)
+    {
         _returnState(WALTER_MODEM_STATE_ERROR);
     }
 
     /* ok, got ring. http context fields have been filled.
      * http status 0 means: timeout (or also disconnected apparently) */
-    if(_httpContextSet[profileId].httpStatus == 0) {
+
+    if (_httpContextSet[profileId].httpStatus == 0)
+    {
         _httpContextSet[profileId].state =
             WALTER_MODEM_HTTP_CONTEXT_STATE_IDLE;
         _returnState(WALTER_MODEM_STATE_ERROR);
     }
 
-    if(_httpContextSet[profileId].contentLength == 0) {
-        _httpContextSet[profileId].state = 
+    if (_httpContextSet[profileId].contentLength == 0)
+    {
+        _httpContextSet[profileId].state =
             WALTER_MODEM_HTTP_CONTEXT_STATE_IDLE;
         rsp->type = WALTER_MODEM_RSP_DATA_TYPE_HTTP_RESPONSE;
-        rsp->data.httpResponse.httpStatus = 
+        rsp->data.httpResponse.httpStatus =
             _httpContextSet[profileId].httpStatus;
         rsp->data.httpResponse.contentLength = 0;
         _returnState(WALTER_MODEM_STATE_NO_DATA);
@@ -4441,14 +4457,6 @@ bool WalterModem::httpDidRing(
             completeHandler, NULL, WALTER_MODEM_CMD_TYPE_TX_WAIT,
             targetBuf, targetBufSize);
     _returnAfterReply();
-}
-
-bool WalterModem::httpReceive(
-    uint8_t profileId,
-    uint8_t *targetBuf,
-    uint16_t targetBufSize,
-    WalterModemRsp *rsp = NULL) {
-
 }
 
 bool WalterModem::mqttDidRing(
@@ -5606,4 +5614,9 @@ void WalterModem::onSystemEvent(walterModemSystemEventHandler handler, void *arg
 void WalterModem::onATEvent(walterModemATEventHandler handler, void *args) {
     _eventHandlers[WALTER_MODEM_EVENT_TYPE_AT].handler = (void *) handler;
     _eventHandlers[WALTER_MODEM_EVENT_TYPE_AT].args = args;
+}
+
+void WalterModem::onHTTPEvent(walterModemHTTPEventHandler handler, void *args) {
+    _eventHandlers[WALTER_MODEM_EVENT_TYPE_HTTP].handler = (void *)handler;
+    _eventHandlers[WALTER_MODEM_EVENT_TYPE_HTTP].args = args;
 }

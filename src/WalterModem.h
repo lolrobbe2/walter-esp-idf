@@ -1033,7 +1033,17 @@ typedef void (*walterModemSystemEventHandler)(WalterModemSystemEvent ev, void *a
  */
 typedef void (*walterModemATEventHandler)(const char *buff, size_t len, void *args);
 
-typedef void (*walterModemMQTTEventHandler)(WalterModemMQTTEvent ev, void *args);
+/**
+ * @brief Header of an HTTP event handler.
+ *
+ * @param ev The type of HTTP event.
+ * @param id The HTTP context profile id.
+ *
+ * @param args Optional arguments set by the application layer.
+ * 
+ * @return None.
+ */
+typedef void (*walterModemHTTPEventHandler)(WalterModemHTTPEvent ev, uint8_t id, void *args);
 
 /**
  * @brief This structure represents an event handler and it's metadata.
@@ -4911,6 +4921,19 @@ class WalterModem
          * @return None.
          */
         static void onATEvent(walterModemATEventHandler handler = nullptr, void *args = nullptr);
-};
 
+        /**
+         * @brief  Register an HTTP event handler.
+         *
+         * This function will register an application layer HTTP event handler. If you want to
+         * Explicitly de-register the handler for this type of event you can pass a nullptr to
+         * this function.
+         *
+         * @param handler Pointer to the handler function or nullptr to de-register.
+         * @param args Optional application layer arguments.
+         *
+         * @return None.
+         */
+        static void onHTTPEvent(walterModemHTTPEventHandler handler, void *args) 
+};
 #endif
