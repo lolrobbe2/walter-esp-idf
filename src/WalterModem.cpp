@@ -4070,7 +4070,7 @@ char WalterModem::_getLuhnChecksum(const char *imei)
     return (char) (((10 - (sum % 10)) % 10) + '0');
 }
 
-void WalterModem::_dispatchEvent(WalterModemEventType type, int subtype, void *data)
+void WalterModem::_dispatchEvent(WalterModemEventType type, int subtype, void *data, int id)
 {
     WalterModemEventHandler *handler = _eventHandlers + type;
 
@@ -4441,6 +4441,14 @@ bool WalterModem::httpDidRing(
             completeHandler, NULL, WALTER_MODEM_CMD_TYPE_TX_WAIT,
             targetBuf, targetBufSize);
     _returnAfterReply();
+}
+
+bool WalterModem::httpReceive(
+    uint8_t profileId,
+    uint8_t *targetBuf,
+    uint16_t targetBufSize,
+    WalterModemRsp *rsp = NULL) {
+
 }
 
 bool WalterModem::mqttDidRing(

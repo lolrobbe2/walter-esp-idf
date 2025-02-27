@@ -974,6 +974,15 @@ typedef enum {
     WALTER_MODEM_EVENT_TYPE_AT = 2,
 
     /**
+     * @brief Incomming HTTP events.
+     */
+    WALTER_MODEM_EVENT_TYPE_HTTP = 3,
+
+    /**
+     * @brief Incoming MQTT events.
+     */
+    WALTER_MODEM_EVENT_TYPE_MQTT = 4
+    /**
      * @brief The number of event types supported by the library.
      */
     WALTER_MODEM_EVENT_TYPE_COUNT
@@ -983,9 +992,16 @@ typedef enum {
  * @brief This enumeration groups the different types of system events.
  */
 typedef enum {
-  WALTER_MODEM_SYSTEM_EVENT_STARTED,
+    WALTER_MODEM_SYSTEM_EVENT_STARTED,
 } WalterModemSystemEvent;
 
+typedef enum {
+    WALTER_MODEM_MQTT_EVENT_RING,
+} WalterModemMQTTEvent;
+
+typedef enum {
+    WALTER_MODEM_HTTP_EVENT_RING,
+} WalterModemHTTPEvent;
 /**
  * @brief Header of a network registration event handler.
  * 
@@ -1016,6 +1032,8 @@ typedef void (*walterModemSystemEventHandler)(WalterModemSystemEvent ev, void *a
  * @return None.
  */
 typedef void (*walterModemATEventHandler)(const char *buff, size_t len, void *args);
+
+typedef void (*walterModemMQTTEventHandler)(WalterModemMQTTEvent ev, void *args);
 
 /**
  * @brief This structure represents an event handler and it's metadata.
@@ -3033,7 +3051,7 @@ class WalterModem
          * 
          * @return None.
          */
-        static void _dispatchEvent(WalterModemEventType type, int subtype, void *data = nullptr);
+        static void _dispatchEvent(WalterModemEventType type, int subtype, void *data = nullptr, int id = 0);
         
         /**
          * @brief Save context data in RTC memory before ESP deep sleep.
@@ -3722,7 +3740,23 @@ class WalterModem
                 uint8_t *targetBuf,
                 uint16_t targetBufSize,
                 WalterModemRsp *rsp = NULL);
-
+        /**
+         * @brief Fetch http response to earlier http request
+         * 
+         * @param profileId Profile for which to get response
+         * @param targetBuf User buffer to store response in.
+         * @param targetBufSize Size of the user buffer, including space for a
+         * terminating null byte.
+         * @param rsp Pointer to a modem response structure to save the result
+         * of the command in. When NULL is given the result is ignored.
+         *
+         * @return True on success, false if no ring was received or error.
+         */
+        static bool httpReceive(
+                uint8_t profileId,
+                uint8_t *targetBuf,
+                uint16_t targetBufSize,
+                WalterModemRsp *rsp = NULL);
         /**
          * @brief Upload BlueCherry credentials to the modem.
          *
