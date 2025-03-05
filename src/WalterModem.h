@@ -1967,7 +1967,7 @@ typedef struct {
     /**
      * @brief The FiFo command queue.
      */
-    WalterModemCmd *queue[WALTER_MODEM_MAX_PENDING_COMMANDS] = { NULL };
+    WalterModemCmd* queue[WALTER_MODEM_MAX_PENDING_COMMANDS] = { NULL };
 
     /**
      * @brief Index of the outgoing queue item.
@@ -2598,7 +2598,7 @@ class WalterModem {
          *
          * @return The modem's maximum block size.
          */
-        static uint16_t _modemFirmwareUpgradeStart(void);
+        static const uint16_t _modemFirmwareUpgradeStart(void);
 
         /**
          * @brief Helper to boot modem into new firmware after upgrade.
@@ -2617,7 +2617,7 @@ class WalterModem {
          * 
          * @return None.
          */
-        static void _modemFirmwareUpgradeBlock(size_t blockSize, uint32_t transactionId);
+        static void _modemFirmwareUpgradeBlock(size_t blockSize, const uint32_t transactionId);
 
         /**
          * @brief Helper to abstract away UART RX difference between the IDF and Arduino.
@@ -2626,6 +2626,8 @@ class WalterModem {
          * @param readSize The number of bytes to read.
          * @param tryHard When true the function will block until the number of required bytes
          * are received from the modem.
+         * 
+         * @return Total bytes read
          */
         static size_t _uartRead(uint8_t *buf, int readSize, bool tryHard = false);
 
@@ -2637,7 +2639,7 @@ class WalterModem {
          * 
          * @return The actual number of bytes written to the UART.
          */
-        static size_t _uartWrite(uint8_t *buf, int writeSize);
+        static size_t _uartWrite(uint8_t *buf,int writeSize);
 
         /**
          * @brief Helper function to calculate the Sequans STP protocol CRC.
@@ -2647,7 +2649,7 @@ class WalterModem {
          * 
          * @return The resulting checksum.
          */
-        static uint16_t _calculateStpCrc16(const void *input, size_t length);
+        static uint16_t _calculateStpCrc16(const void *input,const size_t length);
 
         /**
          * @brief Get a command from the command pool.
@@ -2677,7 +2679,7 @@ class WalterModem {
          * 
          * @return True on success, false when the queue is full.
          */
-        static bool _cmdQueuePut(WalterModemCmd *cmd);
+        static bool _cmdQueuePut(WalterModemCmd* const cmd);
 
         /**
          * @brief Get a PDP context structure which is not in use.
@@ -2688,7 +2690,7 @@ class WalterModem {
          * 
          * @return Pointer to a PDP which is not yet in use or NULL when all contexts are in use.
          */
-        static WalterModemPDPContext* _pdpContextReserve();
+        static WalterModemPDPContext* const _pdpContextReserve();
 
         /**
          * @brief Get a reference to the PDP context with the given id.
@@ -2700,7 +2702,7 @@ class WalterModem {
          * 
          * @return Pointer to the PDP context with the given id or NULL.
          */
-        static WalterModemPDPContext* _pdpContextGet(int id = -1);
+        static WalterModemPDPContext* const _pdpContextGet(int id = -1);
 
         /**
          * @brief Release a PDP context structure back to the pool.
@@ -2711,7 +2713,7 @@ class WalterModem {
          * 
          * @return None.
          */
-        static void _pdpContextRelease(WalterModemPDPContext *ctx);
+        static void _pdpContextRelease(WalterModemPDPContext* const ctx);
 
         /**
          * @brief Save the PDP context to RTC memory
@@ -2723,7 +2725,7 @@ class WalterModem {
          * 
          * @return None.
          */
-        static void _saveRTCPdpContextSet(WalterModemPDPContext *_pdpCtxSetRTC = NULL);
+        static void _saveRTCPdpContextSet(WalterModemPDPContext* const _pdpCtxSetRTC = NULL);
 
         /**
          * @brief Load the PDP context from RTC memory
@@ -2922,7 +2924,7 @@ class WalterModem {
          * @return The number of ticks after which this function wants to be called again with the
          * command to process.
          */
-        static TickType_t _processQueueCmd(WalterModemCmd *cmd, bool queueError = false);
+        static TickType_t _processQueueCmd(WalterModemCmd* const cmd, bool queueError = false);
 
         /**
          * @brief Process an AT response from the queue.
@@ -2937,7 +2939,7 @@ class WalterModem {
          * 
          * @return None.
          */
-        static void _processQueueRsp(WalterModemCmd *cmd, WalterModemBuffer *rsp);
+        static void _processQueueRsp(WalterModemCmd* const cmd, WalterModemBuffer* const rsp);
     
         /**
          * @brief Process an incoming BlueCherry event.

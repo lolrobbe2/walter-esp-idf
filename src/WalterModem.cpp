@@ -700,7 +700,7 @@ bool strToFloat(const char *str, int len, float *result)
     return true;
 }
 
-WalterModemCmd* WalterModem::_cmdPoolGet()
+WalterModemCmd* const WalterModem::_cmdPoolGet()
 {
     for(size_t i = 0; i < WALTER_MODEM_MAX_PENDING_COMMANDS; ++i) {
         WalterModemCmd *cmd = _cmdPool + i;
@@ -720,7 +720,7 @@ WalterModemCmd* WalterModem::_cmdQueuePop()
         return NULL;
     }
 
-    WalterModemCmd *cmd = _cmdQueue.queue[_cmdQueue.outIdx];
+    WalterModemCmd *const cmd = _cmdQueue.queue[_cmdQueue.outIdx];
     _cmdQueue.queue[_cmdQueue.outIdx] = NULL;
     _cmdQueue.outIdx += 1;
     if(_cmdQueue.outIdx == WALTER_MODEM_MAX_PENDING_COMMANDS) {
@@ -729,7 +729,7 @@ WalterModemCmd* WalterModem::_cmdQueuePop()
     return cmd;
 }
 
-bool WalterModem::_cmdQueuePut(WalterModemCmd *cmd)
+bool WalterModem::_cmdQueuePut(WalterModemCmd * const cmd)
 {
     if(_cmdQueue.inIdx == _cmdQueue.outIdx && _cmdQueue.queue[_cmdQueue.outIdx] != NULL) {
         /* The queue is full */
@@ -745,7 +745,7 @@ bool WalterModem::_cmdQueuePut(WalterModemCmd *cmd)
     return true;
 }
 
-WalterModemPDPContext* WalterModem::_pdpContextReserve()
+WalterModemPDPContext * WalterModem::_pdpContextReserve()
 {
     WalterModemPDPContext *ctx = NULL;
 
@@ -781,7 +781,7 @@ WalterModemPDPContext* WalterModem::_pdpContextGet(int id)
     return NULL;
 }
 
-void WalterModem::_pdpContextRelease(WalterModemPDPContext *ctx)
+void WalterModem::_pdpContextRelease(WalterModemPDPContext *const ctx)
 {
     if(ctx == NULL) {
         return;
@@ -790,14 +790,14 @@ void WalterModem::_pdpContextRelease(WalterModemPDPContext *ctx)
     ctx->state = WALTER_MODEM_PDP_CONTEXT_STATE_FREE;
 }
 
-void WalterModem::_saveRTCPdpContextSet(WalterModemPDPContext *_pdpCtxSetRTC)
+void WalterModem::_saveRTCPdpContextSet(WalterModemPDPContext* const _pdpCtxSetRTC)
 {
     for(int i = 0; i < WALTER_MODEM_MAX_PDP_CTXTS; ++i) {
         _pdpCtxSetRTC[i] = _pdpCtxSet[i];
     }
 }
 
-void WalterModem::_loadRTCPdpContextSet(WalterModemPDPContext *_pdpCtxSetRTC)
+void WalterModem::_loadRTCPdpContextSet(WalterModemPDPContext* const _pdpCtxSetRTC)
 {
     if(_pdpCtxSetRTC == NULL) {
         return;
@@ -963,7 +963,7 @@ void WalterModem::_queueRxBuffer()
     }
 }
 
-size_t WalterModem::_uartRead(uint8_t *buf, int readSize, bool tryHard)
+size_t WalterModem::_uartRead(uint8_t *buf,int readSize, bool tryHard)
 {
     size_t totalBytesRead = 0;
 
@@ -985,7 +985,7 @@ size_t WalterModem::_uartRead(uint8_t *buf, int readSize, bool tryHard)
     return totalBytesRead;
 }
 
-size_t WalterModem::_uartWrite(uint8_t *buf, int writeSize)
+size_t WalterModem::_uartWrite(uint8_t *buf,int writeSize)
 {
 #ifdef ARDUINO
     writeSize = _uart->write(buf, writeSize);
@@ -1269,7 +1269,7 @@ WalterModemCmd* WalterModem::_addQueueCmd(
     WalterModemBuffer* stringsBuffer,
     uint8_t maxAttempts)
 {
-    WalterModemCmd *cmd = _cmdPoolGet();
+    WalterModemCmd * const cmd = _cmdPoolGet();
     if(cmd == NULL) {
         return NULL;
     }
@@ -1314,7 +1314,7 @@ WalterModemCmd* WalterModem::_addQueueCmd(
     return cmd;
 }
 
-void WalterModem::_finishQueueCmd(WalterModemCmd *cmd, WalterModemState result)
+void WalterModem::_finishQueueCmd(WalterModemCmd* const cmd,const WalterModemState result)
 {
     cmd->rsp->result = result;
 
@@ -1337,7 +1337,7 @@ void WalterModem::_finishQueueCmd(WalterModemCmd *cmd, WalterModemState result)
     }
 }
 
-TickType_t WalterModem::_processQueueCmd(WalterModemCmd *cmd, bool queueError)
+TickType_t WalterModem::_processQueueCmd(WalterModemCmd* const cmd, bool queueError)
 {
     if(queueError) {
         _finishQueueCmd(cmd, WALTER_MODEM_STATE_NO_MEMORY);
@@ -1434,7 +1434,7 @@ static void coap_received_from_bluecherry(const WalterModemRsp *rsp, void *args)
     }
 }
 
-void WalterModem::_processQueueRsp(WalterModemCmd *cmd, WalterModemBuffer *buff)
+void WalterModem::_processQueueRsp(WalterModemCmd* const cmd, WalterModemBuffer* const buff)
 {
     ESP_LOGD("WalterModem", "RX: %.*s", buff->size, buff->data);
     _dispatchEvent((const char*) (buff->data), buff->size);
@@ -2953,7 +2953,7 @@ uint16_t WalterModem::_calculateStpCrc16(const void *input, size_t length)
     return _switchEndian16(crc);
 }
 
-uint16_t WalterModem::_modemFirmwareUpgradeStart(void)
+const uint16_t WalterModem::_modemFirmwareUpgradeStart(void)
 {
     char *atCmd[WALTER_MODEM_COMMAND_MAX_ELEMS + 1] = { NULL };
     int len;
@@ -3206,7 +3206,7 @@ void WalterModem::_modemFirmwareUpgradeFinish(bool success)
     _rxHandlerInterrupted = false;
 }
 
-void WalterModem::_modemFirmwareUpgradeBlock(size_t blockSize, uint32_t transactionId)
+void WalterModem::_modemFirmwareUpgradeBlock(size_t blockSize,const uint32_t transactionId)
 {
     size_t bytesSent, bytesReceived;
 
@@ -3912,9 +3912,9 @@ void WalterModem::_checkEventDuration(
     }
 }
 
-void WalterModem::_dispatchEvent(WalterModemNetworkRegState state)
+void WalterModem::_dispatchEvent(const WalterModemNetworkRegState state)
 {
-    WalterModemEventHandler *handler = _eventHandlers + WALTER_MODEM_EVENT_TYPE_REGISTRATION;
+    WalterModemEventHandler* const handler = _eventHandlers + WALTER_MODEM_EVENT_TYPE_REGISTRATION;
     if(handler->regHandler == nullptr) {
         return;
     }
@@ -3926,7 +3926,7 @@ void WalterModem::_dispatchEvent(WalterModemNetworkRegState state)
 
 void WalterModem::_dispatchEvent(WalterModemSystemEvent event)
 {
-    WalterModemEventHandler *handler = _eventHandlers + WALTER_MODEM_EVENT_TYPE_SYSTEM;
+    WalterModemEventHandler* const handler = _eventHandlers + WALTER_MODEM_EVENT_TYPE_SYSTEM;
     if(handler->sysHandler == nullptr) {
         return;
     }
@@ -3938,7 +3938,7 @@ void WalterModem::_dispatchEvent(WalterModemSystemEvent event)
 
 void WalterModem::_dispatchEvent(const char *buff, size_t len)
 {
-    WalterModemEventHandler *handler = _eventHandlers + WALTER_MODEM_EVENT_TYPE_AT;
+    WalterModemEventHandler* const handler = _eventHandlers + WALTER_MODEM_EVENT_TYPE_AT;
     if(handler->atHandler == nullptr) {
         return;
     }
@@ -3950,7 +3950,7 @@ void WalterModem::_dispatchEvent(const char *buff, size_t len)
 
 void WalterModem::_dispatchEvent(const WalterModemGNSSFix *fix)
 {
-    WalterModemEventHandler *handler = _eventHandlers + WALTER_MODEM_EVENT_TYPE_GNSS;
+    WalterModemEventHandler* const handler = _eventHandlers + WALTER_MODEM_EVENT_TYPE_GNSS;
     if(handler->gnssHandler == nullptr) {
         return;
     }
