@@ -700,7 +700,7 @@ bool strToFloat(const char *str, int len, float *result)
     return true;
 }
 
-WalterModemCmd* const WalterModem::_cmdPoolGet()
+WalterModemCmd* WalterModem::_cmdPoolGet()
 {
     for(size_t i = 0; i < WALTER_MODEM_MAX_PENDING_COMMANDS; ++i) {
         WalterModemCmd *cmd = _cmdPool + i;
@@ -745,7 +745,7 @@ bool WalterModem::_cmdQueuePut(WalterModemCmd * const cmd)
     return true;
 }
 
-WalterModemPDPContext * WalterModem::_pdpContextReserve()
+WalterModemPDPContext* WalterModem::_pdpContextReserve()
 {
     WalterModemPDPContext *ctx = NULL;
 
@@ -846,7 +846,7 @@ WalterModemSocket* WalterModem::_socketGet(int id)
     return NULL;
 }
 
-void WalterModem::_socketRelease(WalterModemSocket *sock)
+void WalterModem::_socketRelease(WalterModemSocket* const sock)
 {
     if(sock == NULL) {
         return;
@@ -1258,15 +1258,15 @@ void WalterModem::_queueProcessingTask(void *args)
 WalterModemCmd* WalterModem::_addQueueCmd(
     const char *atCmd[WALTER_MODEM_COMMAND_MAX_ELEMS + 1],
     const char *atRsp,
-    WalterModemRsp *rsp,
-    walterModemCb userCb,
+    WalterModemRsp* const rsp,
+    walterModemCb const userCb,
     void *userCbArgs,
     void (*completeHandler)(struct sWalterModemCmd *cmd, WalterModemState result),
     void *completeHandlerArg,
     WalterModemCmdType type,
-    uint8_t *data,
+    uint8_t* const data,
     uint16_t dataSize,
-    WalterModemBuffer* stringsBuffer,
+    WalterModemBuffer* const stringsBuffer,
     uint8_t maxAttempts)
 {
     WalterModemCmd * const cmd = _cmdPoolGet();
@@ -2674,7 +2674,7 @@ after_processing_logic:
     buff->free = true;
 }
 
-bool WalterModem::_processOtaInitializeEvent(uint8_t *data, uint16_t len)
+bool WalterModem::_processOtaInitializeEvent(const uint8_t* const data, uint16_t len)
 {
     if(!blueCherry.otaBuffer || len != sizeof(uint32_t)) {
         return true;
@@ -2758,7 +2758,7 @@ bool WalterModem::_otaBufferToFlash(void)
     return true;
 }
 
-bool WalterModem::_processOtaChunkEvent(uint8_t *data, uint16_t len)
+bool WalterModem::_processOtaChunkEvent(const uint8_t* const data, uint16_t len)
 {
     if(!blueCherry.otaSize || len == 0 || blueCherry.otaProgress + len > blueCherry.otaSize) {
         ESP_LOGD("WalterModem", "OTA: cancelled because empty chunk or chunk beyond update size");
@@ -2886,7 +2886,7 @@ bool WalterModem::_motaFormatAndMount(void)
     return true;
 }
 
-bool WalterModem::_processMotaInitializeEvent(uint8_t *data, uint16_t len)
+bool WalterModem::_processMotaInitializeEvent(const uint8_t* const data, uint16_t len)
 {
     if(!blueCherry.otaBuffer || len != sizeof(uint32_t)) {
         return true;
@@ -2909,7 +2909,7 @@ bool WalterModem::_processMotaInitializeEvent(uint8_t *data, uint16_t len)
     return false;
 }
 
-bool WalterModem::_processMotaChunkEvent(uint8_t *data, uint16_t len)
+bool WalterModem::_processMotaChunkEvent(const uint8_t* const data, uint16_t len)
 {
     if(!blueCherry.otaSize || len == 0 || blueCherry.otaProgress + len > blueCherry.otaSize) {
         ESP_LOGD("WalterModem", "MOTA: cancelled because empty chunk or chunk beyond update size");
@@ -2953,7 +2953,7 @@ uint16_t WalterModem::_calculateStpCrc16(const void *input, size_t length)
     return _switchEndian16(crc);
 }
 
-const uint16_t WalterModem::_modemFirmwareUpgradeStart(void)
+uint16_t WalterModem::_modemFirmwareUpgradeStart(void)
 {
     char *atCmd[WALTER_MODEM_COMMAND_MAX_ELEMS + 1] = { NULL };
     int len;
@@ -3360,7 +3360,7 @@ bool WalterModem::_processMotaFinishEvent(void)
     }
 }
 
-bool WalterModem::_processBlueCherryEvent(uint8_t *data, uint8_t len)
+bool WalterModem::_processBlueCherryEvent(const uint8_t* const data, uint8_t len)
 {
     switch(data[0]) {
         case WALTER_MODEM_BLUECHERRY_EVENT_TYPE_OTA_INITIALIZE:
@@ -3553,13 +3553,13 @@ bool WalterModem::sendCmd(const char *cmd)
         != nullptr;
 }
 
-bool WalterModem::softReset(WalterModemRsp *rsp, walterModemCb cb, void *args)
+bool WalterModem::softReset(WalterModemRsp* const rsp, walterModemCb const cb, void *args)
 {
     _runCmd({"AT^RESET"}, "+SYSSTART", rsp, cb, args);
     _returnAfterReply();
 }
 
-bool WalterModem::reset(WalterModemRsp *rsp, walterModemCb cb, void *args)
+bool WalterModem::reset(WalterModemRsp* const rsp, walterModemCb const cb, void *args)
 {
     _runCmd({}, "+SYSSTART", rsp, cb, args, NULL, NULL, WALTER_MODEM_CMD_TYPE_WAIT);
 
@@ -3968,8 +3968,8 @@ bool WalterModem::httpConfigProfile(
     bool useBasicAuth,
     const char *authUser,
     const char *authPass,
-    WalterModemRsp *rsp,
-    walterModemCb cb,
+    WalterModemRsp* const rsp,
+    walterModemCb const cb,
     void *args)
 {
     if(profileId >= WALTER_MODEM_MAX_HTTP_PROFILES) {
@@ -3980,7 +3980,7 @@ bool WalterModem::httpConfigProfile(
         port = 443;
     }
 
-    WalterModemBuffer *stringsBuffer = _getFreeBuffer();
+    WalterModemBuffer* const stringsBuffer = _getFreeBuffer();
     stringsBuffer->size +=
         sprintf((char*) stringsBuffer->data, "AT+SQNHTTPCFG=%d,\"%s\",%d,%d,\"%s\",\"%s\"",
         profileId, serverName, port, useBasicAuth, authUser, authPass);
@@ -3999,8 +3999,8 @@ bool WalterModem::httpConfigProfile(
 
 bool WalterModem::httpConnect(
     uint8_t profileId,
-    WalterModemRsp *rsp,
-    walterModemCb cb,
+    WalterModemRsp* const rsp,
+    walterModemCb const cb,
     void *args)
 {
     if(profileId >= WALTER_MODEM_MAX_HTTP_PROFILES) {
@@ -4017,8 +4017,8 @@ bool WalterModem::httpConnect(
 
 bool WalterModem::httpClose(
     uint8_t profileId,
-    WalterModemRsp *rsp,
-    walterModemCb cb,
+    WalterModemRsp* const rsp,
+    walterModemCb const cb,
     void *args)
 {
     if(profileId >= WALTER_MODEM_MAX_HTTP_PROFILES) {

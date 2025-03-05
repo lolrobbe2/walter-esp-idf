@@ -2598,7 +2598,7 @@ class WalterModem {
          *
          * @return The modem's maximum block size.
          */
-        static const uint16_t _modemFirmwareUpgradeStart(void);
+        static uint16_t _modemFirmwareUpgradeStart(void);
 
         /**
          * @brief Helper to boot modem into new firmware after upgrade.
@@ -2690,7 +2690,7 @@ class WalterModem {
          * 
          * @return Pointer to a PDP which is not yet in use or NULL when all contexts are in use.
          */
-        static WalterModemPDPContext* const _pdpContextReserve();
+        static WalterModemPDPContext* _pdpContextReserve();
 
         /**
          * @brief Get a reference to the PDP context with the given id.
@@ -2702,7 +2702,7 @@ class WalterModem {
          * 
          * @return Pointer to the PDP context with the given id or NULL.
          */
-        static WalterModemPDPContext* const _pdpContextGet(int id = -1);
+        static WalterModemPDPContext* _pdpContextGet(int id = -1);
 
         /**
          * @brief Release a PDP context structure back to the pool.
@@ -2737,7 +2737,7 @@ class WalterModem {
          * 
          * @return None.
          */
-        static void _loadRTCPdpContextSet(WalterModemPDPContext *_pdpCtxSetRTC = NULL);
+        static void _loadRTCPdpContextSet(WalterModemPDPContext* const _pdpCtxSetRTC = NULL);
 
         /**
          * @brief Get a socket structure which is not in use.
@@ -2770,7 +2770,7 @@ class WalterModem {
          * 
          * @return None.
          */
-        static void _socketRelease(WalterModemSocket *sock);
+        static void _socketRelease(WalterModemSocket* const sock);
 
         /**
          * @brief Test if the new buffer line starts a raw data chunk
@@ -2883,15 +2883,15 @@ class WalterModem {
         static WalterModemCmd* _addQueueCmd(
             const char *atCmd[WALTER_MODEM_COMMAND_MAX_ELEMS + 1] = { NULL },
             const char *atRsp = NULL,
-            WalterModemRsp *rsp = NULL,
-            walterModemCb userCb = NULL,
+            WalterModemRsp* const rsp = NULL,
+            walterModemCb const userCb = NULL,
             void *userCbArgs = NULL,
             void (*completeHandler)(struct sWalterModemCmd *cmd, WalterModemState result) = NULL,
             void *completeHandlerArg = NULL,
-            WalterModemCmdType type = WALTER_MODEM_CMD_TYPE_TX_WAIT,
-            uint8_t *data = NULL,
+            const WalterModemCmdType type = WALTER_MODEM_CMD_TYPE_TX_WAIT,
+            uint8_t* const data = NULL,
             uint16_t dataSize = 0,
-            WalterModemBuffer* stringsBuffer = NULL,
+            WalterModemBuffer* const stringsBuffer = NULL,
             uint8_t maxAttempts = WALTER_MODEM_DEFAULT_CMD_ATTEMTS);
 
         /**
@@ -2907,8 +2907,8 @@ class WalterModem {
          * @return None.
          */
         static void _finishQueueCmd(
-            WalterModemCmd *cmd,
-            WalterModemState result = WALTER_MODEM_STATE_OK);
+            WalterModemCmd* const cmd,
+            const WalterModemState result = WALTER_MODEM_STATE_OK);
 
         /**
          * @brief Process an AT command from the queue.
@@ -2952,7 +2952,7 @@ class WalterModem {
          *
          * @return Whether we should emit an error BC event on next sync.
          */
-        static bool _processBlueCherryEvent(uint8_t *data, uint8_t len);
+        static bool _processBlueCherryEvent(const uint8_t* const data, uint8_t len);
 
         /**
          * @brief Process OTA init event
@@ -2966,7 +2966,7 @@ class WalterModem {
          * @return Whether we should emit an error BC event on next sync, in case announced size is
          * too large for partitioning.
          */
-        static bool _processOtaInitializeEvent(uint8_t *data, uint16_t len);
+        static bool _processOtaInitializeEvent(const uint8_t* const data, uint16_t len);
 
         /**
          * @brief Process OTA chunk event
@@ -2980,7 +2980,7 @@ class WalterModem {
          * @return Whether we should emit an error BC event on next sync, in case size so far
          * exceeds announced size, or if it is an empty chunk.
          */
-        static bool _processOtaChunkEvent(uint8_t *data, uint16_t len);
+        static bool _processOtaChunkEvent(const uint8_t* const data, uint16_t len);
 
         /**
          * @brief Write a flash sector to flash, erasing the block first if on an as of yet
@@ -3026,7 +3026,7 @@ class WalterModem {
          * 
          * @return True on success, false on error.
          */
-        static bool _processMotaInitializeEvent(uint8_t *data, uint16_t len);
+        static bool _processMotaInitializeEvent(const uint8_t* const data, uint16_t len);
 
         /**
          * @brief Process an incoming modem firmware chunk.
@@ -3039,7 +3039,7 @@ class WalterModem {
          * 
          * @return True on success, false on error.
          */
-        static bool _processMotaChunkEvent(uint8_t *data, uint16_t len);
+        static bool _processMotaChunkEvent(const uint8_t* const data, uint16_t len);
 
         /**
          * @brief Finish the reception of the new modem firmware.
@@ -3288,8 +3288,8 @@ class WalterModem {
          * @return True on success, false otherwise.
          */
         static bool softReset(
-            WalterModemRsp *rsp = NULL,
-            walterModemCb cb = NULL,
+            WalterModemRsp* const rsp = NULL,
+            walterModemCb const cb = NULL,
             void *args = NULL);
 
         /**
@@ -3304,8 +3304,8 @@ class WalterModem {
          * @return True on success, false otherwise.
          */
         static bool reset(
-            WalterModemRsp *rsp = NULL,
-            walterModemCb cb = NULL,
+            WalterModemRsp* const rsp = NULL,
+            walterModemCb const cb = NULL,
             void *args = NULL);
 
         /**
@@ -3320,8 +3320,8 @@ class WalterModem {
          * @return True on success or false if the communication failed. 
          */
         static bool checkComm(
-            WalterModemRsp *rsp = NULL,
-            walterModemCb cb = NULL,
+            WalterModemRsp* const rsp = NULL,
+            walterModemCb const cb = NULL,
             void *args = NULL);
 
         /**
@@ -3360,8 +3360,8 @@ class WalterModem {
          */
         static bool configCMEErrorReports(
             WalterModemCMEErrorReportsType type = WALTER_MODEM_CME_ERROR_REPORTS_NUMERIC,
-            WalterModemRsp *rsp = NULL,
-            walterModemCb cb = NULL,
+            WalterModemRsp* const rsp = NULL,
+            walterModemCb const cb = NULL,
             void *args = NULL);
 
         /**
@@ -3380,8 +3380,8 @@ class WalterModem {
          */
         static bool configCEREGReports(
             WalterModemCEREGReportsType type = WALTER_MODEM_CEREG_REPORTS_ENABLED,
-            WalterModemRsp *rsp = NULL,
-            walterModemCb cb = NULL,
+            WalterModemRsp* const rsp = NULL,
+            walterModemCb const cb = NULL,
             void *args = NULL);
 
         /**
@@ -3396,7 +3396,7 @@ class WalterModem {
          * 
          * @return True on success, false otherwise.
          */
-        static bool getRSSI(WalterModemRsp *rsp = NULL, walterModemCb cb = NULL, void *args = NULL);
+        static bool getRSSI(WalterModemRsp* const rsp = NULL, walterModemCb const cb = NULL, void *args = NULL);
 
         /**
          * @brief Get extended RSRQ and RSRP signal quality.
@@ -3410,8 +3410,8 @@ class WalterModem {
          * @return True on success, false otherwise.
          */
         static bool getSignalQuality(
-            WalterModemRsp *rsp = NULL,
-            walterModemCb cb = NULL,
+            WalterModemRsp* const rsp = NULL,
+            walterModemCb const cb = NULL,
             void *args = NULL);
 
         /**
@@ -3621,8 +3621,8 @@ class WalterModem {
             bool useBasicAuth = false,
             const char *authUser = "",
             const char *authPass = "",
-            WalterModemRsp *rsp = NULL,
-            walterModemCb cb = NULL,
+            WalterModemRsp* const rsp = NULL,
+            walterModemCb const cb = NULL,
             void *args = NULL);
 
         /**
@@ -3643,8 +3643,8 @@ class WalterModem {
          */
         static bool httpConnect(
             uint8_t profileId,
-            WalterModemRsp *rsp = NULL,
-            walterModemCb cb = NULL,
+            WalterModemRsp* const rsp = NULL,
+            walterModemCb const cb = NULL,
             void *args = NULL);
 
         /**
