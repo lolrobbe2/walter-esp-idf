@@ -2,7 +2,10 @@
 ❗ Do not change the title — it will be automatically updated via GitHub Actions.
 -->
 
-# feature
+# PR type
+
+- [ ] fix
+- [ ] feature
 
 ## 🧩 System or Component
 

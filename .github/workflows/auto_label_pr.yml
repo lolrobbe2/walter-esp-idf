@@ -5,7 +5,9 @@ on:
     types: [opened, edited]
 
 permissions:
-  write-all
+  issues: write
+  pull_requests: write
+
 jobs:
   process-pr:
     runs-on: ubuntu-latest
@@ -33,9 +35,9 @@ jobs:
               return match ? match[1].trim().toLowerCase() : null;
             }
 
-            function detectType() {
-              if (/^#\s*fix\b/im.test(body)) return "fix";
-              if (/^#\s*feature\b/im.test(body)) return "feat";
+            function detectTypeFromChecklist() {
+              if (/\- \[[xX]\] fix/.test(body)) return "fix";
+              if (/\- \[[xX]\] feature/.test(body)) return "feat";
               return "feat";
             }
 
@@ -44,21 +46,23 @@ jobs:
               .split(/[\s,]+/)
               .filter(s => systemLabels.includes(s));
 
-            const systemLabel = systems.length > 0 ? systems : ["other"];
+            const systemLabelsToAdd = systems.length > 0 ? systems : ["other"];
             const shortDesc = extractSection("Short Description") || "unspecified";
-            const type = detectType();
+            const type = detectTypeFromChecklist();
 
             // Add system labels
             await github.rest.issues.addLabels({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number,
-              labels: systemLabel
+              labels: systemLabelsToAdd
             });
 
-            // Set formatted title
-            const systemPart = systemLabel.join(", ");
+            // Compose title with comma separated systems
+            const systemPart = systemLabelsToAdd.join(", ");
             const newTitle = `${type}(${systemPart}): ${shortDesc}`;
+
+            // Update PR title
             await github.rest.pulls.update({
               owner: context.repo.owner,
               repo: context.repo.repo,
