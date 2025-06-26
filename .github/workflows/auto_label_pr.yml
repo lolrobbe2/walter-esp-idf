@@ -5,8 +5,7 @@ on:
     types: [opened, edited]
 
 permissions:
-  pull_requests: write
-
+  write-all
 jobs:
   process-pr:
     runs-on: ubuntu-latest
@@ -29,36 +28,37 @@ jobs:
             const body = context.payload.pull_request.body || "";
 
             function extractSection(title) {
-              const regex = new RegExp(`###\\s+${title}\\s+\\n+([^#]+)`, 'i');
+              const regex = new RegExp(`##\\s+${title}\\s*\\n+([^#]+)`, 'i');
               const match = body.match(regex);
               return match ? match[1].trim().toLowerCase() : null;
             }
 
-            const system = extractSection("System or Component") || "other";
+            function detectType() {
+              if (/^#\s*fix\b/im.test(body)) return "fix";
+              if (/^#\s*feature\b/im.test(body)) return "feat";
+              return "feat";
+            }
+
+            const systemRaw = extractSection("System or Component") || "other";
+            const systems = systemRaw
+              .split(/[\s,]+/)
+              .filter(s => systemLabels.includes(s));
+
+            const systemLabel = systems.length > 0 ? systems : ["other"];
             const shortDesc = extractSection("Short Description") || "unspecified";
+            const type = detectType();
 
-            // Determine type from labels (feat or fix)
-            const labels = context.payload.pull_request.labels.map(label => label.name.toLowerCase());
-            let type = "feat"; // default type
-
-            if (labels.includes("fix")) {
-              type = "fix";
-            } else if (labels.includes("feat")) {
-              type = "feat";
-            }
-
-            // Add system label if missing
-            if (systemLabels.includes(system) && !labels.includes(system)) {
-              await github.rest.issues.addLabels({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-                labels: [system]
-              });
-            }
+            // Add system labels
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: systemLabel
+            });
 
             // Set formatted title
-            const newTitle = `${type}(${system}): ${shortDesc}`;
+            const systemPart = systemLabel.join(", ");
+            const newTitle = `${type}(${systemPart}): ${shortDesc}`;
             await github.rest.pulls.update({
               owner: context.repo.owner,
               repo: context.repo.repo,
